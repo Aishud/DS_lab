@@ -41,10 +41,6 @@ void  mergesort(int  x[ ] , int  n)
       x[i] = temp[i] ;
 
     size = size*2 ;
-
-    for(i=0 ; i<n ; i++)
-      printf("%d " , x[i]) ;
-  printf("\n\n") ;
   }
 }
 
