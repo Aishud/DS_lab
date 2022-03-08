@@ -1,131 +1,132 @@
 #include<stdio.h>
-#include<stdlib.h>
-#include<math.h>
-#include <string.h>
+#define size 50
+char stack[size];
+int top = 0;
 
-char infix_string[20], postfix_string[20];
-int top, stack[20]; 
-
-int pop()
-{
-    if(isEmpty())
-    {
-        printf("Stack is Empty\n");
-        exit(1);
-    }
-    return(stack[top--]);  
+int isempty() {
+	if(top==0)
+		return 1;
+	else 
+		return 0;
 }
 
-int precedence(char symbol)
-{
-    switch(symbol)
-    {
-        case '(': return 0;
-        case '+':
-        case '-':
-            return 1;
-
-        case '*':
-        case '/':
-        case '%':
-            return 2;
-
-        case '^':
-            return 3;
-
-        default:
-            return 0;
-    }
+int isfull() {
+	if(top==size)
+		return 1;
+	else
+		return 0;
 }
 
-int isEmpty()
-{
-    if(top == -1)
-    {
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
+void push(char x) {
+	if(isfull())
+		printf("Stack is full!!!");
+	else
+		stack[top++]=x;
 }
 
-void infix_to_postfix()
-{
-    unsigned int count, temp = 0;
-    char next;
-    char symbol;
-    for(count = 0; count < strlen(infix_string); count++)
-    {
-        symbol = infix_string[count];  
-        if(!check_space(symbol))
-        {
-            switch(symbol)
-            {
-                case '(': push(symbol);
-                    break;
-
-                case ')':
-                    while((next = pop()) != '(')     
-                    {
-                        postfix_string[temp++] = next;
-                    }
-                    break;
-
-                case '+':
-                case '-':
-                case '*':
-                case '/':
-                case '%':
-                case '^':
-                    while(!isEmpty() && precedence(stack[top]) >= precedence(symbol))   
-                        postfix_string[temp++] = pop();
-                    push(symbol);
-                    break;
-
-                default:
-                    postfix_string[temp++] = symbol;
-            }
-        }
-    }
-    while(!isEmpty())
-    {
-        postfix_string[temp++] = pop();
-    }
-    postfix_string[temp] = '\0';
+char pop() {
+	if(isempty())
+		printf("Stack is empty !!!");
+	else
+		return stack[--top]; 
 }
 
-int check_space(char symbol)
-{
-    if(symbol == '\t' || symbol == ' ' )
-    {
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
+int inputpriority(char c) {
+	switch(c) { 
+		case '-': return 1;break;
+		case '+': return 1;break;
+		case '*': return 3;break;
+		case '/': return 3;break;
+		case '^': return 6;break;
+	}
 }
 
-void push(long int symbol)
-{
-    if(top > 20)
-    {
-        printf("Stack Overflow\n");
-        exit(1);
-    }
-    top = top + 1;
-    stack[top] = symbol;    
+int stackpriority(char c) {
+	switch(c) { 
+		case '-':return 2;break;
+		case '+': return 2;break;
+		case '*':return 4;break;
+		case '/': return 4;break;
+		case '^': return 5;break;
+		case '(': return 0;break;
+	}
+}
+void displaystack() {
+	int i;
+	printf("\t stack : ");
+	for(i=0;i<top;i++)
+		printf("%c ",stack[i]);
+}
+void displaypost(char a[],int k) {
+	int i;
+	printf("\t postfix : ");
+	for(i=0;i<k;i++)
+		printf("%c ",a[i]);
+}
+char peek() {
+	return(stack[top-1]);
+	
 }
 
-int main()
-{
-    int count, length;
-    char temp;
-    top = -1;
-    printf("\nINPUT THE INFIX EXPRESSION : ");
-    scanf("%s", infix_string);
-    infix_to_postfix();
-    printf("\nEQUIVALENT POSTFIX EXPRESSION : %s\n", postfix_string);
-    return 0;
+int main() {
+	char token,c,expr[100],post[100];
+	int i,j=0;
+	printf("Enter the Expression : ");
+	scanf("%[^\n]",&expr);
+	for(i=0;expr[i]!='\0';i++) { 
+        token=expr[i];
+		switch(token) { 
+			case '(': 
+                push(token);break;
+			case ')': {
+				while((c=pop())!='(')
+				post[j++]=c;
+				break;
+			}
+			case '-': {
+				while(!isempty() && (stackpriority(peek())>inputpriority(token))) {
+					post[j++]=pop();
+				}
+				push(token);
+				break;
+			}
+			case '+': {	
+				while(!isempty() && (stackpriority(peek())>inputpriority(token))) {
+					post[j++]=pop();
+				}
+				push(token);
+				break;
+			}
+			case '*': {	
+				while(!isempty() && (stackpriority(peek())>inputpriority(token))) {
+					post[j++]=pop();
+				}
+				push(token);
+				break;
+			}
+			case '/': {
+				while(!isempty() && (stackpriority(peek())>inputpriority(token))) {
+					post[j++]=pop();
+				}
+				push(token);
+				break;
+			}
+			case '^': {
+				while(!isempty() && (stackpriority(peek())>inputpriority(token))) {
+					post[j++]=pop();
+				}
+				push(token);
+				break;
+			}
+			default: post[j++]=token;
+		}
+		printf("\n Token: %c",token);
+		displaystack(); 
+		displaypost(post,j);
+	}
+	while(!isempty())
+		post[j++]=pop();
+	post[j]='\0';
+			printf("\n Postfix: %s \n",post);
+			return 0;
 }
