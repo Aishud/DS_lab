@@ -1,132 +1,82 @@
-#include<stdio.h>
-#define size 50
-char stack[size];
-int top = 0;
+#include <stdio.h>
+#include<stdlib.h>
+struct stack{
+	char data;
+	struct stack *next;
+};
 
-int isempty() {
-	if(top==0)
-		return 1;
-	else 
-		return 0;
-}
+struct stack *s=NULL;
+struct stack *temp;
+char a;
 
-int isfull() {
-	if(top==size)
-		return 1;
-	else
-		return 0;
-}
 
-void push(char x) {
-	if(isfull())
-		printf("Stack is full!!!");
-	else
-		stack[top++]=x;
+struct stack* push(struct stack *s, int x){
+	temp=(struct stack*)malloc(sizeof(struct stack));
+	temp->data=x;
+	temp->next=s;
+	s=temp;
+	temp=NULL;
+	return s;	
 }
 
-char pop() {
-	if(isempty())
-		printf("Stack is empty !!!");
-	else
-		return stack[--top]; 
+struct stack* pop(){
+	a=s->data;
+        if(a!='(')
+	 printf("%c",a);
+	temp=s;
+	s=s->next;
+	temp->next=NULL;
+	free(temp);
+	temp=NULL;
+	return s;
 }
 
-int inputpriority(char c) {
-	switch(c) { 
-		case '-': return 1;break;
-		case '+': return 1;break;
-		case '*': return 3;break;
-		case '/': return 3;break;
-		case '^': return 6;break;
-	}
-}
-
-int stackpriority(char c) {
-	switch(c) { 
-		case '-':return 2;break;
-		case '+': return 2;break;
-		case '*':return 4;break;
-		case '/': return 4;break;
-		case '^': return 5;break;
-		case '(': return 0;break;
-	}
-}
-void displaystack() {
-	int i;
-	printf("\t stack : ");
-	for(i=0;i<top;i++)
-		printf("%c ",stack[i]);
-}
-void displaypost(char a[],int k) {
-	int i;
-	printf("\t postfix : ");
-	for(i=0;i<k;i++)
-		printf("%c ",a[i]);
-}
-char peek() {
-	return(stack[top-1]);
-	
-}
-
-int main() {
-	char token,c,expr[100],post[100];
-	int i,j=0;
-	printf("Enter the Expression : ");
-	scanf("%[^\n]",&expr);
-	for(i=0;expr[i]!='\0';i++) { 
-        token=expr[i];
-		switch(token) { 
-			case '(': 
-                push(token);break;
-			case ')': {
-				while((c=pop())!='(')
-				post[j++]=c;
-				break;
-			}
-			case '-': {
-				while(!isempty() && (stackpriority(peek())>inputpriority(token))) {
-					post[j++]=pop();
-				}
-				push(token);
-				break;
-			}
-			case '+': {	
-				while(!isempty() && (stackpriority(peek())>inputpriority(token))) {
-					post[j++]=pop();
-				}
-				push(token);
-				break;
-			}
-			case '*': {	
-				while(!isempty() && (stackpriority(peek())>inputpriority(token))) {
-					post[j++]=pop();
-				}
-				push(token);
-				break;
-			}
-			case '/': {
-				while(!isempty() && (stackpriority(peek())>inputpriority(token))) {
-					post[j++]=pop();
-				}
-				push(token);
-				break;
-			}
-			case '^': {
-				while(!isempty() && (stackpriority(peek())>inputpriority(token))) {
-					post[j++]=pop();
-				}
-				push(token);
-				break;
-			}
-			default: post[j++]=token;
+void topostfix(char*exp){
+	char post[50];
+	char *poststart;
+	poststart=post;
+	while(*exp){
+		switch(*exp){
+			case ' ':break;
+			case '+':
+			case '-':
+				 while(s!=NULL && s->data!='('){
+					s=pop();
+				 }
+				 s=push(s,*exp);
+				 break;
+			case '*':
+			case '/':
+				 while(s!=NULL && (s->data=='*' || s->data=='/')){
+					s=pop();
+					
+				 }
+				 s=push(s,*exp);
+				 break;
+			case '(':s=push(s,*exp);
+				 break;
+			case ')':while(s!=NULL){
+				 	s=pop();
+				 	if(*exp=='(')
+				 		break;
+				 	
+				 }
+				 break;
+			default:printf("%c",*exp);
 		}
-		printf("\n Token: %c",token);
-		displaystack(); 
-		displaypost(post,j);
+		exp++;
 	}
-	while(!isempty())
-		post[j++]=pop();
-	post[j]='\0';
-			printf("\n Postfix: %s \n",post);
-			return 0;
+	while(s!=NULL){
+		s=pop();
+	}	
+	
+	
+} 
+
+int main(){
+	char exp[50];
+	printf("Enter expression(infix):\n");
+	scanf("%s",exp);
+	topostfix(exp);
+	return 0;
 }
